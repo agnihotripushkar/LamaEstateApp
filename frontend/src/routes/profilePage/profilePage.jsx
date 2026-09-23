@@ -1,8 +1,6 @@
-import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-import apiRequest from "../../lib/apiRequest";
-import List from "../../components/list/List";
 
 function ProfilePage() {
   const { currentUser } = useContext(AuthContext);
@@ -70,7 +68,7 @@ function ProfilePage() {
           <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#333', margin: 0 }}>My Listings</h2>
-              {currentUser.role === "REALTOR" && (
+              {currentUser?.role === "REALTOR" && (
                 <button
                   onClick={handleCreatePost}
                   style={{

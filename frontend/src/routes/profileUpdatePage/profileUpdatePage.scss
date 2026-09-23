@@ -1,6 +1,13 @@
+@use "../../responsive.scss" as *;
+
 .profileUpdatePage {
     height: 100%;
     display: flex;
+
+    @include md {
+      flex-direction: column-reverse;
+      gap: 30px;
+    }
   
     .formContainer {
       flex:3;
@@ -17,9 +24,6 @@
           flex-direction: column;
           gap: 5px;
   
-          label {
-          }
-  
           input {
             padding: 20px;
             border-radius: 5px;
@@ -34,6 +38,15 @@
           color: white;
           font-weight: bold;
           cursor: pointer;
+
+          &:disabled {
+            background-color: #bed9d8;
+            cursor: not-allowed;
+          }
+        }
+
+        .error {
+          color: red;
         }
       }
     }
@@ -47,8 +60,15 @@
       align-items: center;
       justify-content: center;
   
-      .avatar{
+      @include md {
+        padding: 20px 0;
+      }
+
+      .avatar {
         width: 50%;
+        max-width: 240px;
+        aspect-ratio: 1;
+        border-radius: 50%;
         object-fit: cover;
       }
     }
