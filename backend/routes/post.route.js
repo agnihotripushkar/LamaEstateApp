@@ -1,6 +1,4 @@
 import express from "express";
-import { verifyToken } from "../lib/verifyToken.js";
-import { verifyRealtor } from "../lib/verifyRole.js";
 import { getPosts, getPost, getStats, getSimilarPosts, getNearbyPosts } from "../controllers/post.controller.js";
 
 const router = express.Router();
