@@ -8,6 +8,9 @@ A full-stack real estate application built with the MERN stack (MongoDB, Express
 *   **Interactive Maps:** View property locations on an interactive map using Leaflet.
 *   **Detailed Views:** informative property details pages with images, descriptions, and amenities.
 *   **Advanced Filtering:** Filter properties by city, price range, type, and more.
+*   **User Roles:** distinct experiences for Customers (renting) and Realtors (listing).
+*   **AI Price Prediction:** ML-powered price estimation on listing pages to assist with competitive pricing.
+*   **Recommendation Engine:** Smart backend recommendation system suggesting relevant properties to users.
 *   **User Authentication:** Secure login and registration system.
 *   **Responsive Design:** optimized for both desktop and mobile devices.
 
@@ -30,6 +33,12 @@ A full-stack real estate application built with the MERN stack (MongoDB, Express
 *   **JWT:** For secure authentication.
 *   **Bcrypt:** For password hashing.
 
+### AI / ML
+*   **Python:** Programming language for AI models.
+*   **Flask:** Micro web framework for serving ML models.
+*   **Scikit-learn:** For machine learning algorithms.
+*   **Pandas/NumPy:** Data manipulation and analysis.
+
 ## 📸 Screenshots
 
 | Home Page | Filter Page |
@@ -45,6 +54,7 @@ A full-stack real estate application built with the MERN stack (MongoDB, Express
 ### Prerequisites
 *   Node.js (v18 or higher)
 *   MongoDB instance
+*   Python (v3.x or higher)
 
 ### Environment Variables
 
@@ -82,3 +92,16 @@ VITE_API_URL="http://localhost:8800/api"
     npm install
     npm run dev
     ```
+
+## 🚀 Deployment
+
+This project uses a monorepo structure. Each component is deployed separately.
+
+*   **Frontend:** Vercel (recommended)
+*   **Backend:** Heroku (using git subtree)
+*   **AI Service:** Heroku (using git subtree)
+
+See the README in each folder for specific instructions:
+*   [Backend Deployment Rules](./backend/README.md)
+*   [Frontend Deployment Rules](./frontend/README.md)
+*   [AI Service Deployment Rules](./ml_service/README.md)

@@ -1,6 +1,4 @@
 import { useState } from "react";
-// Converted to Tailwind CSS
-
 function Slider({ images }) {
   const [imageIndex, setImageIndex] = useState(null);
 

@@ -1,0 +1,13 @@
+{
+  "name": "mer-homerentalapp-root",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "postinstall": "cd backend && npm install",
+    "build": "cd backend && npm run build",
+    "start": "cd backend && npm start"
+  }
+}

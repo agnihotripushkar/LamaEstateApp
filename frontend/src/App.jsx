@@ -8,6 +8,7 @@ import Login from "./routes/login/login";
 import Register from "./routes/register/register";
 import ListPage from "./routes/listPage/ListPage";
 import ProfilePage from "./routes/profilePage/profilePage";
+import ProfileUpdatePage from "./routes/profileUpdatePage/ProfileUpdatePage";
 import SinglePage from "./routes/singlePage/SinglePage";
 import NewPostPage from "./routes/newPostPage/NewPostPage";
 import { AuthContextProvider } from "./context/AuthContext";
@@ -49,6 +50,10 @@ function App() {
         {
           path: "/profile",
           element: <ProfilePage />
+        },
+        {
+          path: "/profile/update",
+          element: <ProfileUpdatePage />
         },
         {
           path: "/property/:id",

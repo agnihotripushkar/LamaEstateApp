@@ -1,14 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import apiRequest from "../../lib/apiRequest";
 import DOMPurify from "dompurify";
+import { AuthContext } from "../../context/AuthContext";
+import Card from "../../components/card/Card";
+import "./SinglePage.scss";
 
 export default function SinglePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [property, setProperty] = useState(null);
+  const [similarPosts, setSimilarPosts] = useState([]);
+  const [nearbyPosts, setNearbyPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { currentUser } = useContext(AuthContext);
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = async () => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    setSaved((prev) => !prev);
+    try {
+      await apiRequest.post("/users/save", { postId: property.id });
+    } catch (err) {
+      console.log(err);
+      setSaved((prev) => !prev);
+    }
+  };
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -17,6 +38,7 @@ export default function SinglePage() {
         setError("");
         const response = await apiRequest.get(`/post/${id}`);
         setProperty(response.data);
+        setSaved(response.data.isSaved);
       } catch (err) {
         console.error("Error fetching property:", err);
         setError("Failed to load property details. Please try again.");
@@ -30,278 +52,199 @@ export default function SinglePage() {
     }
   }, [id]);
 
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (!property) return;
+
+      try {
+        // Fetch Similar Properties
+        const similarRes = await apiRequest.get(`/post/${property.id}/similar`);
+        setSimilarPosts(similarRes.data);
+
+        // Fetch Nearby Properties if lat/lng are available
+        if (property.latitude && property.longitude) {
+          const nearbyRes = await apiRequest.get(`/post/nearby?lat=${property.latitude}&lng=${property.longitude}`);
+          // Filter out the current property from nearby results if it shows up
+          const filteredNearby = nearbyRes.data.filter(p => p.id !== property.id);
+          setNearbyPosts(filteredNearby);
+        }
+      } catch (err) {
+        console.error("Error fetching recommendations:", err);
+      }
+    };
+
+    fetchRecommendations();
+  }, [property]);
+
   if (loading) {
     return (
-      <div style={{
-        textAlign: 'center',
-        padding: '48px',
-        backgroundColor: '#f9f9f9',
-        borderRadius: '12px'
-      }}>
-        <p style={{color: '#666', fontSize: '18px'}}>Loading property details...</p>
+      <div className="singlePageStatus">
+        <p>Loading property details...</p>
       </div>
     );
   }
 
   if (error || !property) {
     return (
-      <div style={{
-        textAlign: 'center',
-        padding: '48px',
-        backgroundColor: '#fef2f2',
-        borderRadius: '12px',
-        border: '1px solid #fecaca'
-      }}>
-        <p style={{color: '#dc2626', fontSize: '18px'}}>{error || "Property not found"}</p>
+      <div className="singlePageStatus error">
+        <p>{error || "Property not found"}</p>
       </div>
     );
   }
 
+  const detail = property.postDetail;
+  const images = detail?.images ?? [];
+
   return (
-    <div style={{padding: '20px', maxWidth: '1200px', margin: '0 auto'}}>
-      {/* Back Button */}
-      <button 
-        onClick={() => navigate(-1)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '12px 20px',
-          backgroundColor: '#f3f4f6',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          marginBottom: '24px',
-          fontSize: '16px',
-          color: '#333'
-        }}
-      >
+    <div className="singlePage">
+      <button className="backButton" onClick={() => navigate(-1)}>
         ← Back to Listings
       </button>
 
-      <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '40px'}}>
-        {/* Main Content */}
-        <div>
-          {/* Image Gallery */}
-          <div style={{marginBottom: '32px'}}>
-            {property.postDetail?.images && property.postDetail.images.length > 0 ? (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 1fr',
-                gap: '8px',
-                height: '400px',
-                borderRadius: '12px',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  backgroundImage: `url(${property.postDetail.images[0]})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
-                <div style={{display: 'grid', gridTemplateRows: '1fr 1fr', gap: '8px'}}>
-                  {property.postDetail.images.slice(1, 3).map((img, index) => (
-                    <div key={index} style={{
-                      backgroundImage: `url(${img})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center'
-                    }} />
-                  ))}
-                </div>
+      <div className="layout">
+        <div className="main">
+          {images.length > 0 ? (
+            <div className="gallery">
+              <div className="bigImage" style={{ backgroundImage: `url(${images[0]})` }} />
+              <div className="smallImages">
+                {images.slice(1, 3).map((img, index) => (
+                  <div key={index} style={{ backgroundImage: `url(${img})` }} />
+                ))}
               </div>
-            ) : (
-              <div style={{
-                height: '400px',
-                backgroundColor: '#e5e7eb',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#666',
-                fontSize: '18px'
-              }}>
-                No Images Available
-              </div>
+            </div>
+          ) : (
+            <div className="noImages">No Images Available</div>
+          )}
+
+          <div className="info">
+            <h1>{property.title}</h1>
+            <div className="address">
+              <span>📍</span>
+              <span>{property.address}</span>
+            </div>
+            <div className="price">${property.price.toLocaleString()}</div>
+
+            {detail?.desc && (
+              <div
+                className="description"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(detail.desc),
+                }}
+              />
             )}
           </div>
 
-          {/* Property Info */}
-          <div style={{marginBottom: '32px'}}>
-            <h1 style={{fontSize: '36px', fontWeight: 'bold', color: '#333', marginBottom: '16px'}}>
-              {property.title}
-            </h1>
-            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px'}}>
-              <span style={{fontSize: '18px'}}>📍</span>
-              <span style={{fontSize: '18px', color: '#666'}}>{property.address}</span>
-            </div>
-            <div style={{fontSize: '32px', fontWeight: 'bold', color: '#fbbf24', marginBottom: '24px'}}>
-              ${property.price.toLocaleString()}
-            </div>
-            
-            {property.postDetail?.desc && (
-              <div style={{
-                padding: '20px',
-                backgroundColor: '#f9f9f9',
-                borderRadius: '8px',
-                marginBottom: '24px'
-              }}>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(property.postDetail.desc),
-                  }}
-                  style={{color: '#666', lineHeight: '1.6'}}
-                />
+          {similarPosts.length > 0 && (
+            <section className="recommendations">
+              <h2>Similar Properties</h2>
+              <div className="cardGrid">
+                {similarPosts.map(post => (
+                  <Card key={post.id} item={post} />
+                ))}
               </div>
-            )}
-          </div>
+            </section>
+          )}
+
+          {nearbyPosts.length > 0 && (
+            <section className="recommendations">
+              <h2>Nearby Properties</h2>
+              <div className="cardGrid">
+                {nearbyPosts.map(post => (
+                  <Card key={post.id} item={post} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
-        {/* Sidebar */}
-        <div>
-          {/* Property Features */}
-          <div style={{
-            backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            marginBottom: '24px'
-          }}>
-            <h3 style={{fontSize: '20px', fontWeight: 'bold', color: '#333', marginBottom: '20px'}}>
-              Property Details
-            </h3>
-            
-            <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-              <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                <span style={{color: '#666'}}>🛏️ Bedrooms:</span>
-                <span style={{fontWeight: '600'}}>{property.bedroom}</span>
+        <aside className="sidebar">
+          <div className="panel">
+            <h3>Property Details</h3>
+            <div className="rows">
+              <div className="row">
+                <span>🛏️ Bedrooms:</span>
+                <span>{property.bedroom}</span>
               </div>
-              <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                <span style={{color: '#666'}}>🚿 Bathrooms:</span>
-                <span style={{fontWeight: '600'}}>{property.bathroom}</span>
+              <div className="row">
+                <span>🚿 Bathrooms:</span>
+                <span>{property.bathroom}</span>
               </div>
-              {property.postDetail?.size && (
-                <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                  <span style={{color: '#666'}}>📐 Size:</span>
-                  <span style={{fontWeight: '600'}}>{property.postDetail.size} sqft</span>
+              {detail?.size && (
+                <div className="row">
+                  <span>📐 Size:</span>
+                  <span>{detail.size} sqft</span>
                 </div>
               )}
-              <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                <span style={{color: '#666'}}>🏠 Type:</span>
-                <span style={{fontWeight: '600', textTransform: 'capitalize'}}>{property.property}</span>
+              <div className="row">
+                <span>🏠 Type:</span>
+                <span className="capitalize">{property.property}</span>
               </div>
             </div>
           </div>
 
-          {/* Additional Features */}
-          {property.postDetail && (
-            <div style={{
-              backgroundColor: 'white',
-              padding: '24px',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              marginBottom: '24px'
-            }}>
-              <h3 style={{fontSize: '20px', fontWeight: 'bold', color: '#333', marginBottom: '20px'}}>
-                Features & Amenities
-              </h3>
-              
-              <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-                {property.postDetail.utilities && (
-                  <div>
-                    <span style={{color: '#666', fontSize: '14px'}}>⚡ Utilities:</span>
-                    <p style={{margin: '4px 0 0 0', fontWeight: '500'}}>{property.postDetail.utilities}</p>
+          {detail && (
+            <div className="panel">
+              <h3>Features &amp; Amenities</h3>
+              <div className="rows">
+                {detail.utilities && (
+                  <div className="stacked">
+                    <span>⚡ Utilities:</span>
+                    <p>{detail.utilities}</p>
                   </div>
                 )}
-                {property.postDetail.pet && (
-                  <div>
-                    <span style={{color: '#666', fontSize: '14px'}}>🐕 Pet Policy:</span>
-                    <p style={{margin: '4px 0 0 0', fontWeight: '500'}}>{property.postDetail.pet}</p>
+                {detail.pet && (
+                  <div className="stacked">
+                    <span>🐕 Pet Policy:</span>
+                    <p>{detail.pet}</p>
                   </div>
                 )}
-                {property.postDetail.income && (
-                  <div>
-                    <span style={{color: '#666', fontSize: '14px'}}>💰 Income Requirement:</span>
-                    <p style={{margin: '4px 0 0 0', fontWeight: '500'}}>{property.postDetail.income}</p>
+                {detail.income && (
+                  <div className="stacked">
+                    <span>💰 Income Requirement:</span>
+                    <p>{detail.income}</p>
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* Nearby Places */}
-          {property.postDetail && (
-            <div style={{
-              backgroundColor: 'white',
-              padding: '24px',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              marginBottom: '24px'
-            }}>
-              <h3 style={{fontSize: '20px', fontWeight: 'bold', color: '#333', marginBottom: '20px'}}>
-                Nearby Places
-              </h3>
-              
-              <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-                {property.postDetail.school && (
-                  <div>
-                    <span style={{color: '#666', fontSize: '14px'}}>🏫 School:</span>
-                    <p style={{margin: '4px 0 0 0', fontWeight: '500'}}>{property.postDetail.school}</p>
+          {detail && (
+            <div className="panel">
+              <h3>Nearby Places</h3>
+              <div className="rows">
+                {detail.school && (
+                  <div className="stacked">
+                    <span>🏫 School:</span>
+                    <p>{detail.school}</p>
                   </div>
                 )}
-                {property.postDetail.bus && (
-                  <div>
-                    <span style={{color: '#666', fontSize: '14px'}}>🚌 Bus Stop:</span>
-                    <p style={{margin: '4px 0 0 0', fontWeight: '500'}}>{property.postDetail.bus}</p>
+                {detail.bus && (
+                  <div className="stacked">
+                    <span>🚌 Bus Stop:</span>
+                    <p>{detail.bus}</p>
                   </div>
                 )}
-                {property.postDetail.restaurant && (
-                  <div>
-                    <span style={{color: '#666', fontSize: '14px'}}>🍽️ Restaurant:</span>
-                    <p style={{margin: '4px 0 0 0', fontWeight: '500'}}>{property.postDetail.restaurant}</p>
+                {detail.restaurant && (
+                  <div className="stacked">
+                    <span>🍽️ Restaurant:</span>
+                    <p>{detail.restaurant}</p>
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-            <button style={{
-              width: '100%',
-              padding: '16px',
-              backgroundColor: '#fbbf24',
-              color: '#333',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: '600',
-              fontSize: '16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}>
-              💬 Send Message
-            </button>
-            <button style={{
-              width: '100%',
-              padding: '16px',
-              backgroundColor: '#333',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: '600',
-              fontSize: '16px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}>
-              ❤️ Save Property
+          <div className="actions">
+            <button className="messageButton">💬 Send Message</button>
+            <button
+              className={`saveButton${saved ? " saved" : ""}`}
+              onClick={handleSave}
+            >
+              {saved ? "❤️ Property Saved" : "🤍 Save Property"}
             </button>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
-  )
+  );
 }

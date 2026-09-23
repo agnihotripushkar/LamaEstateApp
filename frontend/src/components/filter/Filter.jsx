@@ -1,5 +1,4 @@
 import { useState } from "react";
-// Converted to Tailwind CSS
 import { useSearchParams } from "react-router-dom";
 
 function Filter() {

@@ -41,8 +41,7 @@ jspm_packages
 #Excluding build directory
 
 # Markdown files
-*.md
-*.MD
+
 
 # Kiro IDE files and directories
 .kiro/
