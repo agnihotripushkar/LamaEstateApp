@@ -1,215 +1,252 @@
-@import "../../responsive.scss";
+@use "../../responsive.scss" as *;
+
+$accent: #fbbf24;
+$save: #fece51;
+$text: #333;
+$muted: #666;
+
+@mixin panel {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.singlePageStatus {
+  text-align: center;
+  padding: 48px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+
+  p {
+    color: $muted;
+    font-size: 18px;
+  }
+
+  &.error {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+
+    p {
+      color: #dc2626;
+    }
+  }
+}
 
 .singlePage {
-  display: flex;
-  height: 100%;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 
-  @include md {
-    flex-direction: column;
-    overflow: scroll;
+  .backButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background-color: #f3f4f6;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    font-size: 16px;
+    color: $text;
   }
 
-  .details {
-    flex: 3;
-    height: 100%;
-    overflow-y: scroll;
+  .layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
 
     @include md {
-      flex: none;
-      height: max-content;
-      margin-bottom: 50px;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 8px;
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 32px;
+
+    @include sm {
+      grid-template-columns: 1fr;
+      height: 260px;
+
+      .smallImages {
+        display: none;
+      }
     }
 
-    .wrapper {
-      padding-right: 50px;
+    .bigImage,
+    .smallImages > div {
+      background-size: cover;
+      background-position: center;
+    }
 
-      @include lg {
-        padding-right: 20px;
+    .smallImages {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+    }
+  }
+
+  .noImages {
+    height: 400px;
+    background-color: #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $muted;
+    font-size: 18px;
+    margin-bottom: 32px;
+
+    @include sm {
+      height: 200px;
+    }
+  }
+
+  .info {
+    margin-bottom: 32px;
+
+    h1 {
+      font-size: 36px;
+      font-weight: bold;
+      color: $text;
+      margin-bottom: 16px;
+
+      @include sm {
+        font-size: 26px;
       }
-      @include md {
-        padding-right: 0px;
-      }
+    }
 
-      .info {
-        margin-top: 50px;
-        .top {
-          display: flex;
-          justify-content: space-between;
+    .address {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 18px;
+      color: $muted;
+    }
 
-          @include sm {
-            flex-direction: column;
-            gap: 20px;
-          }
+    .price {
+      font-size: 32px;
+      font-weight: bold;
+      color: $accent;
+      margin-bottom: 24px;
+    }
 
-          .post {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            h1 {
-              font-weight: 400;
-            }
-            .address {
-              display: flex;
-              gap: 5px;
-              align-items: center;
-              color: #888;
-              font-size: 14px;
+    .description {
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      color: $muted;
+      line-height: 1.6;
+    }
+  }
 
-              img {
-                width: 16px;
-                height: 16px;
-              }
-            }
-            .price {
-              padding: 5px;
-              background-color: rgba(254, 205, 81, 0.438);
-              border-radius: 5px;
-              width: max-content;
-              font-size: 20px;
-              font-weight: 300;
-            }
-          }
-          .user {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            padding: 0px 50px;
-            border-radius: 10px;
-            background-color: rgba(254, 205, 81, 0.209);
-            font-weight: 600;
+  .recommendations {
+    margin-bottom: 40px;
 
-            @include sm {
-              padding: 20px 50px;
-            }
+    h2 {
+      font-size: 24px;
+      font-weight: bold;
+      color: $text;
+      margin-bottom: 16px;
+    }
 
-            img {
-              width: 50px;
-              height: 50px;
-              border-radius: 50%;
-              object-fit: cover;
-            }
-          }
-        }
-        .bottom {
-          margin-top: 50px;
-          color: #555;
-          line-height: 20px;
-        }
+    .cardGrid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+
+      @include sm {
+        grid-template-columns: 1fr;
       }
     }
   }
-  .features {
-    flex: 2;
-    background-color: #fcf5f3;
-    height: 100%;
-    overflow-y: scroll;
 
-    @include md {
-      flex: none;
-      height: max-content;
-      margin-bottom: 50px;
+  .panel {
+    @include panel;
+    margin-bottom: 24px;
+
+    h3 {
+      font-size: 20px;
+      font-weight: bold;
+      color: $text;
+      margin-bottom: 20px;
     }
 
-    .wrapper {
-      padding: 0px 20px;
+    .rows {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
+    }
 
-      @include md {
-        padding: 20px;
+    .row {
+      display: flex;
+      justify-content: space-between;
+
+      span:first-child {
+        color: $muted;
       }
 
-      img {
-        width: 24px;
-        height: 24px;
+      span:last-child {
+        font-weight: 600;
       }
 
-      .title {
-        font-weight: bold;
-        font-size: 18px;
-        margin-bottom: 10px;
+      .capitalize {
+        text-transform: capitalize;
+      }
+    }
+
+    .stacked {
+      span {
+        color: $muted;
+        font-size: 14px;
       }
 
-      .feature {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        img {
-          background-color: rgba(254, 205, 81, 0.209);
-        }
-
-        .featureText {
-          span {
-            font-weight: bold;
-          }
-          p {
-            font-size: 14px;
-          }
-        }
+      p {
+        margin-top: 4px;
+        font-weight: 500;
       }
+    }
+  }
 
-      .listVertical {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        padding: 20px 10px;
-        background-color: white;
-        border-radius: 10px;
-      }
-      .listHorizontal {
-        display: flex;
-        justify-content: space-between;
-        padding: 20px 10px;
-        background-color: white;
-        border-radius: 10px;
-      }
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 
-      .sizes {
-        display: flex;
-        justify-content: space-between;
+    button {
+      width: 100%;
+      padding: 16px;
+      color: $text;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
 
-        @include lg {
-          font-size: 12px;
-        }
+    .messageButton {
+      background-color: $accent;
+      border: none;
+    }
 
-        .size {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          background-color: white;
-          padding: 10px;
-          border-radius: 5px;
-        }
-      }
+    .saveButton {
+      background-color: white;
+      border: 1px solid $save;
 
-      .mapContainer {
-        width: 100%;
-        height: 200px;
-      }
-
-      .buttons {
-        display: flex;
-        justify-content: space-between;
-
-        button {
-          padding: 20px;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-          background-color: white;
-          border: 1px solid #fece51;
-          border-radius: 5px;
-          cursor: pointer;
-
-          img {
-            width: 16px;
-            height: 16px;
-          }
-        }
+      &.saved {
+        background-color: $save;
       }
     }
   }

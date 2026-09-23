@@ -1,5 +1,4 @@
 import { MapContainer, TileLayer } from 'react-leaflet'
-// Converted to Tailwind CSS
 import "leaflet/dist/leaflet.css";
 import Pin from '../pin/Pin';
 

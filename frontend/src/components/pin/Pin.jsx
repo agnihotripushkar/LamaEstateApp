@@ -1,5 +1,4 @@
 import { Marker, Popup } from "react-leaflet";
-// Converted to Tailwind CSS
 import { Link } from "react-router-dom";
 
 function Pin({ item }) {

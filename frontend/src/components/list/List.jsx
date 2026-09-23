@@ -1,7 +1,6 @@
-// Converted to Tailwind CSS
-import Card from"../card/Card"
+import Card from "../card/Card";
 
-function List(posts){
+function List({ posts }) {
   return (
     <div className='list'>
       {posts.map(item=>(
